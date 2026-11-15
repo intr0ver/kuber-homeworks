@@ -1,0 +1,41 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  # Официальный бокс Ubuntu 22.04 от Canonical.
+  # Guest Additions поставит плагин vagrant-vbguest.
+  config.vm.box = "ubuntu/jammy64"
+  config.vm.box_check_update = false
+
+  # Проверять обновления бокса и VBGA при каждом up (по желанию, можно отключить для скорости)
+  if Vagrant.has_plugin?("vagrant-vbguest")
+    config.vbguest.auto_update = true
+  end
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.gui = false
+    vb.memory = 1536
+    vb.cpus = 1
+  end
+
+  # --- Master ---
+  config.vm.define "master" do |master|
+    master.vm.hostname = "k8s-master"
+    master.vm.network "private_network", ip: "192.168.56.10"
+    master.vm.provider "virtualbox" do |vb|
+      vb.memory = 2048
+      vb.cpus = 2
+    end
+  end
+
+  # --- Workers ---
+  (1..4).each do |i|
+    config.vm.define "worker#{i}" do |worker|
+      worker.vm.hostname = "k8s-worker#{i}"
+      worker.vm.network "private_network", ip: "192.168.56.1#{i}"
+      worker.vm.provider "virtualbox" do |vb|
+        vb.memory = 1536
+      end
+    end
+  end
+end
