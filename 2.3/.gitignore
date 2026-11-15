@@ -1,0 +1,4 @@
+*.crt
+*.key
+secret-tls.yaml.local
+*.csr
